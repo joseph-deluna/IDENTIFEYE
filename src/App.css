@@ -1,0 +1,211 @@
+/* Global styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f8ff; /* Soft background color */
+  color: #333; /* Primary text color */
+}
+
+h1 {
+  text-align: center;
+}
+
+/* App container */
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* Container for squares */
+.squares-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px; /* Space between squares */
+}
+
+/* Individual squares styling */
+.square {
+  margin: auto; /* Adjusted for centering if width is less than grid column */
+  width: 23%;
+  height: 400px;
+  background-color: #ffffff; /* Base color for squares */
+  border-radius: 15px; /* Rounded corners for modern look */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s ease; /* Smooth transform transition */
+  position: relative; /* For absolute positioning of children */
+}
+
+.file-input {
+  opacity: 0; /* Make the file input invisible */
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  cursor: pointer; /* Ensure it's clickable */
+}
+
+.square-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+
+.uploaded-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* This ensures the image maintains its aspect ratio */
+  border-radius: 5px; /* Optional: rounds the corners of the image */
+}
+
+.square:hover {
+  transform: translateY(-5px); /* Slight lift effect on hover */
+}
+
+.square button {
+  background-color: #007bff; /* Button color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer; /* Reinforced clickable effect */
+  transition: background-color 0.3s ease;
+}
+
+.square button:hover {
+  background-color: #0056b3; /* Darken button on hover */
+}
+
+/* Square Three specific styles */
+.square-three {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #fff; /* Adjust background color if needed */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+.square-three h2 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.square-three form {
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* Adjust based on your preference */
+}
+
+.square-three input, .square-three select {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+}
+
+.square-three button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; /* Ensures it's visibly clickable */
+  transition: background-color 0.3s ease;
+}
+
+.square-three button:hover {
+  background-color: #0056b3;
+}
+
+/* Placeholder styles */
+::placeholder {
+  color: #aaa;
+}
+
+/* Login and home container styles */
+.login-container, .home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.login-container form, .home-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input, button {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.face-recognition-animation {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+.face-placeholder {
+  width: 70%;
+  height: 70%;
+  background-image: url('../src/img/face.png'); /* Update with the correct path */
+  background-size: cover; /* Cover the entire area of the div */
+  background-position: center; /* Center the background image */
+  border-radius: 50%; /* Maintain the circular shape */
+  position: absolute;
+  top: 15%; /* Adjust if necessary to center the icon */
+  left: 15%;
+}
+
+.scanner-line {
+  position: absolute;
+  bottom: 100%; /* Start from the bottom */
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #d42405; /* Scanner line color */
+  box-shadow: 0 0 8px #d42405; /* Glowing effect */
+  animation: scan-face 5s ease-in-out infinite; /* Smooth movement */
+}
+
+@keyframes scan-face {
+  0%, 100% {
+    bottom: 100%;
+    box-shadow: 0 0 8px #d42405; /* Initial glow */
+  }
+  50% {
+    bottom: 0;
+    box-shadow: 0 0 15px #d42405, 0 0 30px #d42405; /* Intensify glow in the middle */
+  }
+}
