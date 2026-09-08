@@ -19,7 +19,12 @@ function App() {
     setRoute('/home');
   };
 
-  return route === '/home' ? <Home /> : <Login onLogin={openHome} />;
+  const logOut = () => {
+    window.location.hash = '/';
+    setRoute('/');
+  };
+
+  return route === '/home' ? <Home onLogout={logOut} /> : <Login onLogin={openHome} />;
 }
 
 export default App;

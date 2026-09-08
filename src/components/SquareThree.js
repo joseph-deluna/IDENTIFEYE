@@ -1,6 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { createReferenceDescriptors, loadFaceModels } from '../lib/faceRecognition';
 import { loadStoredProfiles, saveStoredProfiles, upsertProfile } from '../lib/profileStore';
+import {
+  deleteProfileImage,
+  loadProfileImage,
+  saveProfileImage,
+} from '../lib/profileImageStore';
 
 function SquareThree() {
   const [profile, setProfile] = useState({
@@ -10,13 +15,16 @@ function SquareThree() {
   });
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
+    setStatus(null);
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
+    setStatus(null);
     setImages(Array.from(e.target.files || []));
   };
 
@@ -24,22 +32,42 @@ function SquareThree() {
     e.preventDefault();
     if (isLoading) return;
     if (!images.length) {
-      alert('Please choose at least one clear profile image.');
+      setStatus({ type: 'error', text: 'Please choose at least one clear profile image.' });
       return;
     }
 
     setIsLoading(true);
+    setStatus(null);
     try {
       await loadFaceModels();
       const descriptors = await createReferenceDescriptors(images);
       const saved = upsertProfile(loadStoredProfiles(), profile, descriptors);
-      saveStoredProfiles(saved.profiles);
-      alert(saved.updated ? 'Profile updated successfully' : 'Profile added successfully');
+      const previousImage = await loadProfileImage(saved.profile.id);
+      await saveProfileImage(saved.profile.id, images[0]);
+
+      try {
+        saveStoredProfiles(saved.profiles);
+      } catch (storageError) {
+        try {
+          if (previousImage) {
+            await saveProfileImage(saved.profile.id, previousImage);
+          } else {
+            await deleteProfileImage(saved.profile.id);
+          }
+        } catch (rollbackError) {
+          console.error('Unable to restore the previous profile image:', rollbackError);
+        }
+        throw storageError;
+      }
+      setStatus({
+        type: 'success',
+        text: saved.updated ? 'Profile updated successfully.' : 'Profile added successfully.',
+      });
       setProfile({ name: '', age: '', gender: '' });
       setImages([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
-      alert(`Failed to add profile: ${error.message}`);
+      setStatus({ type: 'error', text: `Failed to add profile: ${error.message}` });
     } finally {
       setIsLoading(false);
     }
@@ -47,18 +75,32 @@ function SquareThree() {
 
   return (
     <div className="square square-three">
-      <h2>Add Profile</h2>
+      <div className="panel-heading">
+        <span className="panel-number">03 · ENROLL</span>
+        <h2>Add Profile</h2>
+        <p>Create or update a profile using one or more clear portraits.</p>
+      </div>
       <form onSubmit={handleSubmit}>
-        <input type="text" name="name" value={profile.name} onChange={handleChange} placeholder="Name" required />
-        <input type="number" name="age" value={profile.age} onChange={handleChange} placeholder="Age" required />
-        <select name="gender" value={profile.gender} onChange={handleChange} required>
+        <label className="sr-only" htmlFor="profile-name">Name</label>
+        <input id="profile-name" type="text" name="name" value={profile.name} onChange={handleChange} placeholder="Name" required />
+        <label className="sr-only" htmlFor="profile-age">Age</label>
+        <input id="profile-age" type="number" name="age" min="1" max="120" value={profile.age} onChange={handleChange} placeholder="Age" required />
+        <label className="sr-only" htmlFor="profile-gender">Gender</label>
+        <select id="profile-gender" name="gender" value={profile.gender} onChange={handleChange} required>
           <option value="">Select Gender</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="other">Other</option>
         </select>
-        <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} accept="image/*" />
-        <button type="submit">Submit Profile</button>
+        <label className="profile-photo-label" htmlFor="profile-images">Reference photos</label>
+        <input id="profile-images" ref={fileInputRef} type="file" multiple onChange={handleFileChange} accept="image/*" />
+        {images.length > 0 && (
+          <span className="selected-files">{images.length} photo{images.length === 1 ? '' : 's'} selected · first photo used for the profile</span>
+        )}
+        <button type="submit" disabled={isLoading}>{isLoading ? 'Saving profile…' : 'Submit Profile'}</button>
+        {status && (
+          <p className={`form-status ${status.type}`} role="status" aria-live="polite">{status.text}</p>
+        )}
       </form>
     </div>
   );
