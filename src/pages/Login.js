@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-function Login() {
+function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (username === 'admin' && password === 'admin') {
-      navigate('/home'); // Redirect to home page
+      onLogin();
     } else {
       alert('Invalid credentials');
     }
@@ -18,17 +16,21 @@ function Login() {
   return (
     <div className="login-container">
       <form onSubmit={handleSubmit}>
-        <label>Username:</label>
+        <label htmlFor="username">Username:</label>
         <input
+          id="username"
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          autoComplete="username"
         />
-        <label>Password:</label>
+        <label htmlFor="password">Password:</label>
         <input
+          id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
         />
         <button type="submit">Login</button>
       </form>

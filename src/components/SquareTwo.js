@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { loadStoredProfiles } from '../lib/profileStore';
+import { loadFaceModels, recognizeFaces } from '../lib/faceRecognition';
 
 function SquareTwo({ uploadedImage, onRecognitionComplete }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,29 +15,28 @@ function SquareTwo({ uploadedImage, onRecognitionComplete }) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('image', uploadedImage);
-
     try {
-      const response = await fetch('http://localhost:3001/api/recognize', {
-        method: 'POST',
-        body: formData,
-      });
+      await loadFaceModels();
+      const profiles = loadStoredProfiles();
+      const result = await recognizeFaces(uploadedImage, profiles);
+      const match = result.faces.find((face) => face.isMatch);
+      let recognitionResult;
 
-      setIsLoading(false);
-
-      if (!response.ok) {
-        const errorResult = await response.text(); // Use text() in case the response is not JSON
-        setMessage(errorResult || 'Recognition failed.');
-        return;
+      if (match) {
+        recognitionResult = {
+          match: true,
+          message: `Match found: ${match.label}`,
+        };
+      } else {
+        recognitionResult = { match: false, message: 'No match found.' };
       }
 
-      const result = await response.json();
-      onRecognitionComplete(result);
-      setMessage(result.message);
+      onRecognitionComplete?.(recognitionResult);
+      setMessage(recognitionResult.message);
     } catch (error) {
       console.error('Error during face recognition:', error);
-      setMessage('Recognition process error.');
+      setMessage(error.message || 'Recognition process error.');
+    } finally {
       setIsLoading(false);
     }
   };

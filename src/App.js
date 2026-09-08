@@ -1,18 +1,25 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import './App.css'; // Assuming you have a global CSS file
+import './App.css';
+
+const getRoute = () => window.location.hash.replace(/^#/, '') || '/';
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  const [route, setRoute] = useState(getRoute);
+
+  useEffect(() => {
+    const handleHashChange = () => setRoute(getRoute());
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const openHome = () => {
+    window.location.hash = '/home';
+    setRoute('/home');
+  };
+
+  return route === '/home' ? <Home /> : <Login onLogin={openHome} />;
 }
 
 export default App;

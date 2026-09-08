@@ -1,70 +1,56 @@
-# Getting Started with Create React App
+# IDENTIFEYE
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+IDENTIFEYE is a browser-based face recognition demonstration. Its original interface is preserved while enrollment and recognition now run entirely on the user's device, making the project compatible with GitHub Pages.
 
-## Available Scripts
+## Try the demo
 
-In the project directory, you can run:
+The login is a presentation-only gate:
 
-### `yarn start`
+- Username: `admin`
+- Password: `admin`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+On the main screen:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. Use **Add Profile** to enter a name, age, gender, and one or more clear photos of the same consenting person.
+2. Use **Upload Image** to select a comparison photo.
+3. Choose **Recognize Face** to find the nearest enrolled match.
 
-### `yarn test`
+## Privacy and limitations
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Photos are processed locally in the browser and are not uploaded. Only face descriptors and the entered profile metadata are stored in that browser's local storage. Profiles do not sync between devices or browsers.
 
-### `yarn build`
+This is a portfolio demonstration, not identity verification. Do not use it for authentication, access control, surveillance, or safety-critical decisions. Only use photos with the subject's permission.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Local development
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Requires Node.js 20 or later.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm ci
+npm start
+```
 
-### `yarn eject`
+Open `http://localhost:3000`.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Run the automated checks and production build with:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm run check
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## GitHub Pages
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+The workflow in `.github/workflows/pages.yml` tests, builds, and publishes the app whenever `master` is pushed. In the repository's **Settings → Pages**, set **Source** to **GitHub Actions** once.
 
-## Learn More
+The intended public URL is:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+`https://joseph-deluna.github.io/IDENTIFEYE/`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## How it works
 
-### Code Splitting
+- React keeps the original login and three-card interface.
+- `face-api.js` performs face detection, landmarks, descriptor generation, and nearest-neighbor matching in the browser.
+- Tiny Face Detector, tiny landmarks, and face-recognition weights are served from `public/models`.
+- A hash-based route keeps navigation working from the `/IDENTIFEYE/` GitHub Pages path.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The legacy Express and MongoDB prototype remains in `backend/` for historical reference, but the published app does not execute or depend on it.

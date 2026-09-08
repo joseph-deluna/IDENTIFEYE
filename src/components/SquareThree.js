@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { createReferenceDescriptors, loadFaceModels } from '../lib/faceRecognition';
+import { loadStoredProfiles, saveStoredProfiles, upsertProfile } from '../lib/profileStore';
 
 function SquareThree() {
   const [profile, setProfile] = useState({
@@ -7,40 +9,39 @@ function SquareThree() {
     gender: '',
   });
   const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
-    setImages(e.target.files);
+    setImages(Array.from(e.target.files || []));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('name', profile.name);
-    formData.append('age', profile.age);
-    formData.append('gender', profile.gender);
-    Array.from(images).forEach(image => {
-      formData.append('images', image);
-    });
+    if (isLoading) return;
+    if (!images.length) {
+      alert('Please choose at least one clear profile image.');
+      return;
+    }
 
+    setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/profiles', {
-        method: 'POST',
-        body: formData,
-      });
-      if (response.ok) {
-        alert('Profile added successfully');
-        setProfile({ name: '', age: '', gender: '' });
-        setImages([]);
-      } else {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
+      await loadFaceModels();
+      const descriptors = await createReferenceDescriptors(images);
+      const saved = upsertProfile(loadStoredProfiles(), profile, descriptors);
+      saveStoredProfiles(saved.profiles);
+      alert(saved.updated ? 'Profile updated successfully' : 'Profile added successfully');
+      setProfile({ name: '', age: '', gender: '' });
+      setImages([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
       alert(`Failed to add profile: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,7 +57,7 @@ function SquareThree() {
           <option value="female">Female</option>
           <option value="other">Other</option>
         </select>
-        <input type="file" multiple onChange={handleFileChange} accept="image/*" />
+        <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} accept="image/*" />
         <button type="submit">Submit Profile</button>
       </form>
     </div>

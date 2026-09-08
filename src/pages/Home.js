@@ -13,7 +13,7 @@ function Home() {
     setUploadedImage(image);
   };
 
-const [recognitionResult, setRecognitionResult] = useState(null);
+const [, setRecognitionResult] = useState(null);
 
 const handleRecognitionComplete = (result) => {
   if (result.match) {
