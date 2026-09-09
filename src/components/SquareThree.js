@@ -7,7 +7,7 @@ import {
   saveProfileImage,
 } from '../lib/profileImageStore';
 
-function SquareThree() {
+function SquareThree({ onViewDatabase, onProfilesChanged }) {
   const [profile, setProfile] = useState({
     name: '',
     age: '',
@@ -63,6 +63,7 @@ function SquareThree() {
         type: 'success',
         text: saved.updated ? 'Profile updated successfully.' : 'Profile added successfully.',
       });
+      onProfilesChanged?.();
       setProfile({ name: '', age: '', gender: '' });
       setImages([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -76,7 +77,7 @@ function SquareThree() {
   return (
     <div className="square square-three">
       <div className="panel-heading">
-        <span className="panel-number">03 · ENROLL</span>
+        <span className="panel-number">03 · REGISTER</span>
         <h2>Add Profile</h2>
         <p>Create or update a profile using one or more clear portraits.</p>
       </div>
@@ -98,6 +99,7 @@ function SquareThree() {
           <span className="selected-files">{images.length} photo{images.length === 1 ? '' : 's'} selected · first photo used for the profile</span>
         )}
         <button type="submit" disabled={isLoading}>{isLoading ? 'Saving profile…' : 'Submit Profile'}</button>
+        <button className="database-open-button" type="button" onClick={onViewDatabase}>View Database</button>
         {status && (
           <p className={`form-status ${status.type}`} role="status" aria-live="polite">{status.text}</p>
         )}

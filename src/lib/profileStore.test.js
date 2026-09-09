@@ -4,6 +4,7 @@ import {
   loadStoredProfiles,
   removeStoredProfile,
   saveStoredProfiles,
+  updateStoredProfile,
   upsertProfile,
 } from './profileStore';
 
@@ -68,4 +69,82 @@ test('removes one profile and clears persisted profiles', () => {
 
   clearStoredProfiles();
   expect(window.localStorage.getItem(PROFILE_STORAGE_KEY)).toBeNull();
+});
+
+test('updates profile metadata by id while preserving biometric data and timestamps', () => {
+  const descriptors = [descriptor(0.25)];
+  const original = {
+    id: 'stable-id',
+    name: 'Old name',
+    age: '28',
+    gender: 'male',
+    descriptors,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-02T00:00:00.000Z',
+  };
+
+  jest.useFakeTimers().setSystemTime(new Date('2026-02-03T04:05:06.000Z'));
+  const result = updateStoredProfile(
+    [original],
+    'stable-id',
+    { name: '  New name  ', age: 29, gender: 'other' }
+  );
+  jest.useRealTimers();
+
+  expect(result).toEqual([
+    {
+      ...original,
+      name: 'New name',
+      age: '29',
+      gender: 'other',
+      updatedAt: '2026-02-03T04:05:06.000Z',
+    },
+  ]);
+  expect(result[0].id).toBe(original.id);
+  expect(result[0].createdAt).toBe(original.createdAt);
+  expect(result[0].descriptors).toBe(descriptors);
+  expect(original.name).toBe('Old name');
+});
+
+test('allows a profile to retain its own name regardless of case and whitespace', () => {
+  const original = {
+    id: 'one',
+    name: 'Alex',
+    age: '28',
+    gender: 'male',
+    descriptors: [descriptor()],
+  };
+
+  expect(
+    updateStoredProfile([original], 'one', {
+      name: '  ALEX  ',
+      age: '28',
+      gender: 'male',
+    })[0].name
+  ).toBe('ALEX');
+});
+
+test('rejects blank and case-insensitive duplicate profile names', () => {
+  const profiles = [
+    { id: 'one', name: 'Alex', descriptors: [descriptor()] },
+    { id: 'two', name: 'Blair', descriptors: [descriptor()] },
+  ];
+
+  expect(() =>
+    updateStoredProfile(profiles, 'one', { name: '   ', age: '', gender: '' })
+  ).toThrow('Profile name is required.');
+  expect(() =>
+    updateStoredProfile(profiles, 'one', { name: ' BLAIR ', age: '', gender: '' })
+  ).toThrow('A profile with this name already exists.');
+  expect(profiles[0].name).toBe('Alex');
+});
+
+test('rejects an update when the stable profile id does not exist', () => {
+  expect(() =>
+    updateStoredProfile(
+      [{ id: 'one', name: 'Alex', descriptors: [descriptor()] }],
+      'missing',
+      { name: 'Alex', age: '', gender: '' }
+    )
+  ).toThrow('Profile not found.');
 });

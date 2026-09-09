@@ -14,6 +14,7 @@ On the main screen:
 1. Use **Add Profile** to enter a name, age, gender, and one or more clear photos of the same consenting person. The first photo becomes the profile portrait shown with a match.
 2. Use **Upload Image** to select a comparison photo.
 3. Choose **Recognize Face** to find the nearest enrolled match.
+4. Choose **View Database** in the Register panel to edit profile details or permanently delete a profile and its saved portrait.
 
 ## Privacy and limitations
 

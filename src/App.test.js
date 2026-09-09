@@ -3,6 +3,7 @@ import App from './App';
 
 beforeEach(() => {
   window.location.hash = '#/';
+  window.localStorage.clear();
 });
 
 test('renders the branded login form', () => {
@@ -11,8 +12,9 @@ test('renders the branded login form', () => {
   const logo = container.querySelector('.login-brand img');
   expect(logo).toBeInTheDocument();
   expect(logo.getAttribute('src')).toMatch(/identifeye-logo/i);
-  expect(screen.getByText('IDENTIFEYE')).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'IDENTIFEYE' })).toBeInTheDocument();
+  expect(screen.getByText('Face Recognition System')).toBeInTheDocument();
+  expect(screen.queryByText(/welcome back/i)).not.toBeInTheDocument();
   expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
   expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
@@ -34,7 +36,16 @@ test('opens the three-panel workspace and logs out with the demo login', async (
   expect(screen.getByRole('heading', { name: 'Upload Image' })).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'Recognize Face' })).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'Add Profile' })).toBeInTheDocument();
+  expect(screen.getByText('03 · REGISTER')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Recognize Face' })).toBeDisabled();
+
+  const databaseButton = screen.getByRole('button', { name: 'View Database' });
+  databaseButton.focus();
+  fireEvent.click(databaseButton);
+  expect(screen.getByRole('dialog', { name: 'Saved Profiles' })).toBeInTheDocument();
+  expect(screen.getByText('No profiles registered yet')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Close profile database' }));
+  expect(databaseButton).toHaveFocus();
 
   fireEvent.click(within(navigation).getByRole('button', { name: /log out/i }));
 

@@ -184,3 +184,18 @@ test('clears an earlier match when a later scan has no match', async () => {
     });
   });
 });
+
+test('clears a displayed match when the profile database changes', async () => {
+  const image = new File(['query'], 'query.jpg');
+  const { rerender } = render(
+    <SquareTwo uploadedImage={image} profileRevision={0} />
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Recognize Face' }));
+  expect(await screen.findByRole('heading', { name: 'Alex' })).toBeInTheDocument();
+
+  rerender(<SquareTwo uploadedImage={image} profileRevision={1} />);
+
+  expect(screen.queryByRole('heading', { name: 'Alex' })).not.toBeInTheDocument();
+  expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:alex-profile-photo');
+});

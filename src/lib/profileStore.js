@@ -114,3 +114,41 @@ export function upsertProfile(profiles, profileDetails, descriptors) {
 export function removeStoredProfile(profiles, profileId) {
   return profiles.filter((profile) => profile.id !== profileId);
 }
+
+export function updateStoredProfile(profiles, profileId, profileDetails) {
+  const profileIndex = profiles.findIndex((profile) => profile.id === profileId);
+  if (profileIndex < 0) {
+    throw new Error('Profile not found.');
+  }
+
+  const cleanName =
+    typeof profileDetails?.name === 'string' ? profileDetails.name.trim() : '';
+  if (!cleanName) {
+    throw new Error('Profile name is required.');
+  }
+
+  const normalizedName = cleanName.toLocaleLowerCase();
+  const duplicateName = profiles.some(
+    (profile, index) =>
+      index !== profileIndex &&
+      typeof profile.name === 'string' &&
+      profile.name.trim().toLocaleLowerCase() === normalizedName
+  );
+  if (duplicateName) {
+    throw new Error('A profile with this name already exists.');
+  }
+
+  return profiles.map((profile, index) => {
+    if (index !== profileIndex) return profile;
+
+    return {
+      ...profile,
+      name: cleanName,
+      age:
+        profileDetails.age === undefined ? profile.age : String(profileDetails.age),
+      gender:
+        profileDetails.gender === undefined ? profile.gender : profileDetails.gender,
+      updatedAt: new Date().toISOString(),
+    };
+  });
+}

@@ -10,7 +10,7 @@ const displayGender = (gender) => {
   return gender.charAt(0).toUpperCase() + gender.slice(1);
 };
 
-function SquareTwo({ uploadedImage, onRecognitionComplete }) {
+function SquareTwo({ uploadedImage, onRecognitionComplete, profileRevision = 0 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [matchedProfile, setMatchedProfile] = useState(null);
@@ -32,7 +32,7 @@ function SquareTwo({ uploadedImage, onRecognitionComplete }) {
     setMatchedProfile(null);
     setMessage('');
     setIsLoading(false);
-  }, [uploadedImage, releaseProfileImage]);
+  }, [uploadedImage, profileRevision, releaseProfileImage]);
 
   useEffect(() => () => {
     operationRef.current += 1;

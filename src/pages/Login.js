@@ -21,10 +21,9 @@ function Login({ onLogin }) {
       <section className="login-card" aria-labelledby="login-title">
         <div className="login-brand">
           <img className="login-logo" src={loginLogo} alt="" />
-          <span>IDENTIFEYE</span>
+          <h1 id="login-title">IDENTIFEYE</h1>
         </div>
-        <h1 id="login-title">Welcome back</h1>
-        <p className="login-subtitle">Secure, on-device face recognition for this portfolio demonstration.</p>
+        <p className="login-subtitle">Face Recognition System</p>
         <form className="login-form" onSubmit={handleSubmit}>
           <label htmlFor="username">Username</label>
           <input
